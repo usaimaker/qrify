@@ -1,0 +1,32 @@
+name: Ping Search Engines
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Bing via IndexNow
+        run: |
+          curl -s -o /dev/null -w "Bing: %{http_code}\n" \
+            -X POST "https://www.bing.com/indexnow" \
+            -H "Content-Type: application/json" \
+            -d '{"host":"qrify-ebon.vercel.app","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify-ebon.vercel.app/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify-ebon.vercel.app/","https://qrify-ebon.vercel.app/qr-code-with-logo","https://qrify-ebon.vercel.app/wifi-qr-code","https://qrify-ebon.vercel.app/vcard-qr-code","https://qrify-ebon.vercel.app/svg-qr-code"]}'
+
+      - name: Ping Yandex
+        run: |
+          curl -s -o /dev/null -w "Yandex: %{http_code}\n" \
+            -X POST "https://yandex.com/indexnow" \
+            -H "Content-Type: application/json" \
+            -d '{"host":"qrify-ebon.vercel.app","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify-ebon.vercel.app/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify-ebon.vercel.app/","https://qrify-ebon.vercel.app/qr-code-with-logo","https://qrify-ebon.vercel.app/wifi-qr-code","https://qrify-ebon.vercel.app/vcard-qr-code","https://qrify-ebon.vercel.app/svg-qr-code"]}'
+
+      - name: Ping Yahoo
+        run: |
+          curl -s -o /dev/null -w "Yahoo: %{http_code}\n" \
+            -X POST "https://search.yahooapis.com/SiteExplorerService/V1/updateNotification" \
+            -H "Content-Type: application/json" \
+            -d '{"url":"https://qrify-ebon.vercel.app"}'
