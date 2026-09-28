@@ -1,14 +1,14 @@
 export const ADSENSE_PUBLISHER_ID = "ca-pub-9959815194191047";
 
 // Google Search Console 所有权验证 token（HTML 元标记法）。
-// 为空时不渲染。已硬编码当前 qrify.is-a.dev 的 SC 验证 token 作为兜底，
+// 为空时不渲染。已硬编码当前 qrify-ebon.vercel.app 的 SC 验证 token 作为兜底，
 // 确保静态预渲染的 HTML 必然包含该 meta 标签（环境变量方式在静态页构建期取不到）。
 export const GSC_VERIFICATION =
   process.env.NEXT_PUBLIC_GSC_VERIFICATION ||
   process.env.GSC_VERIFICATION ||
   "J-PQr8rpxOgFD6GMG2R7IDbI0jyJZlOLGXQkCeSfEXc";
 
-export const SITE_URL = "https://qrify.is-a.dev";
+export const SITE_URL = "https://qrify-ebon.vercel.app";
 export const SITE_NAME = "QRify";
 export const SITE_TITLE = "Free QR Code Generator with Logo, Color & SVG - QRify";
 export const SITE_DESCRIPTION =
