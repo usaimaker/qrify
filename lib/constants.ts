@@ -8,7 +8,7 @@ export const GSC_VERIFICATION =
   process.env.GSC_VERIFICATION ||
   "J-PQr8rpxOgFD6GMG2R7IDbI0jyJZlOLGXQkCeSfEXc";
 
-export const SITE_URL = "https://qrify-ebon.vercel.app";
+export const SITE_URL = "https://qrify.dynv6.net";
 export const SITE_NAME = "QRify";
 export const SITE_TITLE = "Free QR Code Generator with Logo, Color & SVG - QRify";
 export const SITE_DESCRIPTION =
