@@ -15,7 +15,7 @@ Free QR Code Generator with Logo, Color & SVG — 100% client-side.
 
 ## Try it
 
-👉 https://qrify-ebon.vercel.app
+👉 https://qrify.dynv6.net
 
 ## Built With
 
