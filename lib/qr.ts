@@ -25,7 +25,7 @@ export interface QrSettings {
 }
 
 export const DEFAULT_SETTINGS: QrSettings = {
-  data: "https://qrify-ebon.vercel.app",
+  data: "https://qrify.dynv6.net",
   dotsColor: "#4f46e5",
   dotsType: "rounded",
   bgColor: "#ffffff",
@@ -58,7 +58,7 @@ export function buildPayload(s: QrSettings): Record<string, unknown> {
     width: 320,
     height: 320,
     type: "svg",
-    data: s.data || "https://qrify-ebon.vercel.app",
+    data: s.data || "https://qrify.dynv6.net",
     margin: s.margin,
     qrOptions: { errorCorrectionLevel: s.logoDataUrl ? "H" : "M" },
     dotsOptions,
