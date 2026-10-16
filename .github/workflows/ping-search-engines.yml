@@ -16,11 +16,11 @@ jobs:
           curl -s -o /dev/null -w "Bing: %{http_code}\n" \
             -X POST "https://www.bing.com/indexnow" \
             -H "Content-Type: application/json" \
-            -d '{"host":"qrify-ebon.vercel.app","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify-ebon.vercel.app/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify-ebon.vercel.app/","https://qrify-ebon.vercel.app/qr-code-with-logo","https://qrify-ebon.vercel.app/wifi-qr-code","https://qrify-ebon.vercel.app/vcard-qr-code","https://qrify-ebon.vercel.app/svg-qr-code"]}'
+            -d '{"host":"qrify.dynv6.net","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify.dynv6.net/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify.dynv6.net/","https://qrify.dynv6.net/qr-code-with-logo","https://qrify.dynv6.net/wifi-qr-code","https://qrify.dynv6.net/vcard-qr-code","https://qrify.dynv6.net/svg-qr-code"]}'
 
       - name: Ping Yandex
         run: |
           curl -s -o /dev/null -w "Yandex: %{http_code}\n" \
             -X POST "https://yandex.com/indexnow" \
             -H "Content-Type: application/json" \
-            -d '{"host":"qrify-ebon.vercel.app","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify-ebon.vercel.app/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify-ebon.vercel.app/","https://qrify-ebon.vercel.app/qr-code-with-logo","https://qrify-ebon.vercel.app/wifi-qr-code","https://qrify-ebon.vercel.app/vcard-qr-code","https://qrify-ebon.vercel.app/svg-qr-code"]}'
+            -d '{"host":"qrify.dynv6.net","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify.dynv6.net/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify.dynv6.net/","https://qrify.dynv6.net/qr-code-with-logo","https://qrify.dynv6.net/wifi-qr-code","https://qrify.dynv6.net/vcard-qr-code","https://qrify.dynv6.net/svg-qr-code"]}'
