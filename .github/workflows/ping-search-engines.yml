@@ -3,6 +3,8 @@ name: Ping Search Engines
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'stats/**'
   schedule:
     - cron: '0 2 * * *'
 
