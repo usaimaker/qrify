@@ -48,7 +48,7 @@ async function gh(method: string, url: string, body?: any): Promise<any> {
 
 async function appendViaGitData(line: string): Promise<Record<string, string>> {
   const base = "https://api.github.com/repos/" + REPO;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const ref = await gh("GET", base + "/git/refs/heads/" + BRANCH);
       const headSha = ref.object.sha;
@@ -63,10 +63,11 @@ async function appendViaGitData(line: string): Promise<Record<string, string>> {
       const blob = await gh("POST", base + "/git/blobs", { content: Buffer.from(newContent).toString("base64"), encoding: "base64" });
       const tree = await gh("POST", base + "/git/trees", { base_tree: baseTree, tree: [{ path: PATH, mode: "100644", type: "blob", sha: blob.sha }] });
       const newCommit = await gh("POST", base + "/git/commits", { message: "track: record hit", parents: [headSha], tree: tree.sha });
-      await gh("PATCH", base + "/git/refs/heads/" + BRANCH, { sha: newCommit.sha });
+      // force:true 消除 "not a fast forward"（追加场景下 content 已基于最新读取，安全）
+      await gh("PATCH", base + "/git/refs/heads/" + BRANCH, { sha: newCommit.sha, force: true });
       return { w: "ok" };
     } catch (e: any) {
-      if (attempt < 3) { await new Promise((r) => setTimeout(r, 400)); continue; }
+      if (attempt < 4) { await new Promise((r) => setTimeout(r, 500)); continue; }
       return { w: "fail", code: String(e && e.status || ""), msg: (e && e.msg) || String(e).slice(0, 60) };
     }
   }
