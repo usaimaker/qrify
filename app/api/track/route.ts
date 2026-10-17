@@ -3,9 +3,12 @@ import { NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 
 const REPO = "usaimaker/qrify";
-const STATS_PATH = "stats/hits.jsonl";
+const PATH = "stats/hits.jsonl";
 const BRANCH = "stats";
 const TOKEN = process.env.QRIFY_STATS_PAT || "";
+const AUTH: Record<string, string> = TOKEN
+  ? { Authorization: "Bearer " + TOKEN, "User-Agent": "qrify-track", Accept: "application/vnd.github+json" }
+  : {};
 
 export async function GET(req: NextRequest) {
   const u = new URL(req.url);
@@ -17,8 +20,8 @@ export async function GET(req: NextRequest) {
   if (ref) { try { refHost = new URL(ref).host; } catch { refHost = ref.slice(0, 60); } }
   const rec = JSON.stringify({ t: new Date().toISOString(), p: path, c: country, ref: refHost, ua }) + "\n";
 
-  let wres: Record<string,string> = { w: "skip" };
-  if (TOKEN) { wres = await appendToGitHub(rec); }
+  let wres: Record<string, string> = { w: "skip" };
+  if (TOKEN) { try { wres = await appendViaGitData(rec); } catch (e) { wres = { w: "exc", msg: String(e).slice(0, 60) }; } }
 
   const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
   return new Response(gif, {
@@ -27,34 +30,44 @@ export async function GET(req: NextRequest) {
       "Content-Type": "image/gif",
       "Cache-Control": "no-store, no-cache, must-revalidate",
       "x-tk": TOKEN ? "1" : "0",
-      "x-tk-len": String(TOKEN.length),
-      "x-write": (wres.w || "") + (wres.code ? ":" + wres.code : "") + (wres.msg ? ":" + wres.msg : ""),
+      "x-write": wres.w + (wres.code ? ":" + wres.code : "") + (wres.msg ? ":" + wres.msg : ""),
     },
   });
 }
 
-async function appendToGitHub(line: string): Promise<Record<string,string>> {
-  const api = "https://api.github.com";
-  const auth: Record<string,string> = { Authorization: "Bearer " + TOKEN, "User-Agent": "qrify-track", Accept: "application/vnd.github+json" };
-  for (let attempt = 0; attempt < 5; attempt++) {
+async function gh(method: string, url: string, body?: any): Promise<any> {
+  const r = await fetch(url, {
+    method,
+    headers: { ...AUTH, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const txt = await r.text();
+  if (!r.ok) { const e: any = new Error("gh " + r.status); e.status = r.status; e.msg = txt.slice(0, 80); throw e; }
+  return txt ? JSON.parse(txt) : null;
+}
+
+async function appendViaGitData(line: string): Promise<Record<string, string>> {
+  const base = "https://api.github.com/repos/" + REPO;
+  for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      const g = await fetch(api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?ref=" + BRANCH, { headers: auth });
-      let content = "", sha = "";
-      if (g.ok) { const j = await g.json(); content = Buffer.from(j.content, "base64").toString("utf8"); sha = j.sha; }
-      else if (g.status !== 404) { return { w: "getfail", code: String(g.status) }; }
-      const newContent = Buffer.from(content + line).toString("base64");
-      const pr = await fetch(api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?branch=" + BRANCH, {
-        method: "PUT", headers: { ...auth, "Content-Type": "application/json" },
-        body: JSON.stringify({ message: "track: record hit", content: newContent, sha: sha || undefined }),
-      });
-      if (pr.ok) return { w: "ok" };
-      const txt = await pr.text();
-      if (pr.status === 409) { await new Promise((r) => setTimeout(r, 400)); continue; }
-      return { w: "putfail", code: String(pr.status), msg: txt.slice(0, 50) };
-    } catch (e) {
-      const m = String(e).slice(0, 50);
-      if (attempt === 4) return { w: "exc", msg: m };
-      await new Promise((r) => setTimeout(r, 300));
+      const ref = await gh("GET", base + "/git/refs/heads/" + BRANCH);
+      const headSha = ref.object.sha;
+      const commit = await gh("GET", base + "/git/commits/" + headSha);
+      const baseTree = commit.tree.sha;
+      let existing = "";
+      try {
+        const c = await gh("GET", base + "/contents/" + PATH + "?ref=" + BRANCH);
+        existing = Buffer.from(c.content, "base64").toString("utf8");
+      } catch (e: any) { if (e.status !== 404) throw e; }
+      const newContent = existing + line;
+      const blob = await gh("POST", base + "/git/blobs", { content: Buffer.from(newContent).toString("base64"), encoding: "base64" });
+      const tree = await gh("POST", base + "/git/trees", { base_tree: baseTree, tree: [{ path: PATH, mode: "100644", type: "blob", sha: blob.sha }] });
+      const newCommit = await gh("POST", base + "/git/commits", { message: "track: record hit", parents: [headSha], tree: tree.sha });
+      await gh("PATCH", base + "/git/refs/heads/" + BRANCH, { sha: newCommit.sha });
+      return { w: "ok" };
+    } catch (e: any) {
+      if (attempt < 3) { await new Promise((r) => setTimeout(r, 400)); continue; }
+      return { w: "fail", code: String(e && e.status || ""), msg: (e && e.msg) || String(e).slice(0, 60) };
     }
   }
   return { w: "exhausted" };
