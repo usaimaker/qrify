@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
   return new Response(gif, {
     status: 200,
-    headers: { "Content-Type": "image/gif", "Cache-Control": "no-store, no-cache, must-revalidate" },
+    headers: { "Content-Type": "image/gif", "Cache-Control": "no-store, no-cache, must-revalidate", "x-tk": TOKEN ? "1" : "0", "x-tk-len": String(TOKEN.length) },
   });
 }
 
