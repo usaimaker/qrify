@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 export const dynamic = "force-dynamic";
 
 const REPO = "usaimaker/qrify";
-const PATH = "stats/hits.jsonl";
+const DIR = "stats/hits";
 const TOKEN = process.env.QRIFY_STATS_PAT || "";
 const AUTH: Record<string, string> = TOKEN
   ? { Authorization: "Bearer " + TOKEN, "User-Agent": "qrify-track", Accept: "application/vnd.github+json" }
@@ -17,10 +17,10 @@ export async function GET(req: NextRequest) {
   const ua = (req.headers.get("user-agent") || "").slice(0, 90);
   let refHost = "";
   if (ref) { try { refHost = new URL(ref).host; } catch { refHost = ref.slice(0, 60); } }
-  const rec = JSON.stringify({ t: new Date().toISOString(), p: path, c: country, ref: refHost, ua }) + "\n";
+  const rec = { t: new Date().toISOString(), p: path, c: country, ref: refHost, ua };
 
-  let wres: Record<string, string> = { w: "skip" };
-  if (TOKEN) { try { wres = await appendViaContents(rec); } catch (e) { wres = { w: "exc", msg: String(e).slice(0, 60) }; } }
+  let w = "skip";
+  if (TOKEN) { try { w = await writeHit(rec); } catch (e) { w = "exc:" + String(e).slice(0, 50); } }
 
   const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
   return new Response(gif, {
@@ -29,49 +29,31 @@ export async function GET(req: NextRequest) {
       "Content-Type": "image/gif",
       "Cache-Control": "no-store, no-cache, must-revalidate",
       "x-tk": TOKEN ? "1" : "0",
-      "x-write": wres.w + (wres.code ? ":" + wres.code : "") + (wres.msg ? ":" + wres.msg : ""),
+      "x-write": w,
     },
   });
 }
 
-async function gh(method: string, url: string, body?: any): Promise<any> {
-  const r = await fetch(url, {
-    method,
-    headers: { ...AUTH, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const txt = await r.text();
-  if (!r.ok) { const e: any = new Error("gh " + r.status); e.status = r.status; e.msg = txt.slice(0, 70); throw e; }
-  return txt ? JSON.parse(txt) : null;
-}
-
-async function appendViaContents(line: string): Promise<Record<string, string>> {
-  const base = "https://api.github.com/repos/" + REPO + "/contents/" + PATH; // 默认分支(=main)
-  for (let attempt = 0; attempt < 6; attempt++) {
+async function writeHit(rec: Record<string, string>): Promise<string> {
+  const stamp = Date.now().toString(36);
+  const rnd = Math.random().toString(36).slice(2, 8);
+  const name = stamp + "-" + rnd + ".json";
+  const url = "https://api.github.com/repos/" + REPO + "/contents/" + DIR + "/" + name;
+  for (let i = 0; i < 4; i++) {
     try {
-      let content = "";
-      let sha = "";
-      try {
-        const g = await gh("GET", base);
-        content = Buffer.from(g.content, "base64").toString("utf8");
-        sha = g.sha;
-      } catch (e: any) { if (e.status !== 404) throw e; }
-      const newContent = content + line;
-      const body: any = { message: "track: record hit", content: Buffer.from(newContent).toString("base64") };
-      if (sha) body.sha = sha;
-      const r = await fetch(base, {
+      const r = await fetch(url, {
         method: "PUT",
         headers: { ...AUTH, "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ message: "track: hit", content: Buffer.from(JSON.stringify(rec)).toString("base64") }),
       });
-      if (r.ok) return { w: "ok" };
-      if (r.status === 409) { await new Promise((res) => setTimeout(res, 350)); continue; } // 并发冲突，重读重试
+      if (r.ok) return "ok";
+      if (r.status === 409) continue; // 命名冲突，换名重试
       const t = await r.text();
-      return { w: "fail", code: String(r.status), msg: t.slice(0, 60) };
-    } catch (e: any) {
-      if (attempt < 5) { await new Promise((res) => setTimeout(res, 500)); continue; }
-      return { w: "exc", code: String(e && e.status || ""), msg: (e && e.msg) || String(e).slice(0, 60) };
+      return "fail:" + r.status + ":" + t.slice(0, 40);
+    } catch (e) {
+      if (i < 3) { await new Promise((s) => setTimeout(s, 400)); continue; }
+      return "exc:" + String(e).slice(0, 50);
     }
   }
-  return { w: "exhausted" };
+  return "exhausted";
 }
