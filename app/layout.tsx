@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -72,6 +73,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">{children}
         <Analytics />
+        <Script id="qrify-track" strategy="afterInteractive">
+          {`(function(){try{var i=new Image();i.src='/api/track?p='+encodeURIComponent(location.pathname)+'&r='+encodeURIComponent(document.referrer||'');}catch(e){}})();`}
+        </Script>
       </body>
     </html>
   );
