@@ -13,59 +13,49 @@ export async function GET(req: NextRequest) {
   const ref = req.headers.get("referer") || u.searchParams.get("r") || "";
   const country = req.headers.get("x-vercel-ip-country") || "??";
   const ua = (req.headers.get("user-agent") || "").slice(0, 90);
-
   let refHost = "";
-  if (ref) {
-    try { refHost = new URL(ref).host; } catch { refHost = ref.slice(0, 60); }
-  }
+  if (ref) { try { refHost = new URL(ref).host; } catch { refHost = ref.slice(0, 60); } }
+  const rec = JSON.stringify({ t: new Date().toISOString(), p: path, c: country, ref: refHost, ua }) + "\n";
 
-  const rec =
-    JSON.stringify({ t: new Date().toISOString(), p: path, c: country, ref: refHost, ua }) + "\n";
-
-  if (TOKEN) {
-    await appendToGitHub(rec);
-  }
+  let wres: Record<string,string> = { w: "skip" };
+  if (TOKEN) { wres = await appendToGitHub(rec); }
 
   const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
   return new Response(gif, {
     status: 200,
-    headers: { "Content-Type": "image/gif", "Cache-Control": "no-store, no-cache, must-revalidate", "x-tk": TOKEN ? "1" : "0", "x-tk-len": String(TOKEN.length) },
+    headers: {
+      "Content-Type": "image/gif",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "x-tk": TOKEN ? "1" : "0",
+      "x-tk-len": String(TOKEN.length),
+      "x-write": (wres.w || "") + (wres.code ? ":" + wres.code : "") + (wres.msg ? ":" + wres.msg : ""),
+    },
   });
 }
 
-async function appendToGitHub(line: string): Promise<void> {
+async function appendToGitHub(line: string): Promise<Record<string,string>> {
   const api = "https://api.github.com";
-  const auth: Record<string, string> = {
-    Authorization: "Bearer " + TOKEN,
-    "User-Agent": "qrify-track",
-    Accept: "application/vnd.github+json",
-  };
+  const auth: Record<string,string> = { Authorization: "Bearer " + TOKEN, "User-Agent": "qrify-track", Accept: "application/vnd.github+json" };
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      const getUrl = api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?ref=" + BRANCH;
-      const g = await fetch(getUrl, { headers: auth });
-      let content = "";
-      let sha = "";
-      if (g.ok) {
-        const j = await g.json();
-        content = Buffer.from(j.content, "base64").toString("utf8");
-        sha = j.sha;
-      } else if (g.status !== 404) {
-        await new Promise((r) => setTimeout(r, 300));
-        continue;
-      }
+      const g = await fetch(api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?ref=" + BRANCH, { headers: auth });
+      let content = "", sha = "";
+      if (g.ok) { const j = await g.json(); content = Buffer.from(j.content, "base64").toString("utf8"); sha = j.sha; }
+      else if (g.status !== 404) { return { w: "getfail", code: String(g.status) }; }
       const newContent = Buffer.from(content + line).toString("base64");
-      const putUrl = api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?branch=" + BRANCH;
-      const pr = await fetch(putUrl, {
-        method: "PUT",
-        headers: { ...auth, "Content-Type": "application/json" },
+      const pr = await fetch(api + "/repos/" + REPO + "/contents/" + STATS_PATH + "?branch=" + BRANCH, {
+        method: "PUT", headers: { ...auth, "Content-Type": "application/json" },
         body: JSON.stringify({ message: "track: record hit", content: newContent, sha: sha || undefined }),
       });
-      if (pr.ok) return;
+      if (pr.ok) return { w: "ok" };
+      const txt = await pr.text();
       if (pr.status === 409) { await new Promise((r) => setTimeout(r, 400)); continue; }
-      return;
-    } catch {
+      return { w: "putfail", code: String(pr.status), msg: txt.slice(0, 50) };
+    } catch (e) {
+      const m = String(e).slice(0, 50);
+      if (attempt === 4) return { w: "exc", msg: m };
       await new Promise((r) => setTimeout(r, 300));
     }
   }
+  return { w: "exhausted" };
 }
