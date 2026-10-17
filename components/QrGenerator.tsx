@@ -34,6 +34,7 @@ export interface QrGeneratorProps {
 
 export default function QrGenerator({ initialData, dataLabel }: QrGeneratorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const qrRef = useRef<QRCodeStyling | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const initialRef = useRef<QrSettings>({
@@ -51,9 +52,14 @@ export default function QrGenerator({ initialData, dataLabel }: QrGeneratorProps
       if (!mounted) return;
       const qr = new mod.default(buildPayload(initialRef.current));
       qrRef.current = qr;
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
-        qr.append(containerRef.current);
+      if (hostRef.current) {
+        // Render into a dedicated, React-empty host div. React never owns
+        // hostRef's children, so clearing/appending here can't collide with
+        // React's reconciler (the previous bug removed React's <span> via
+        // containerRef.innerHTML, then setLoading(false) tried to remove the
+        // already-detached span -> NotFoundError: removeChild).
+        hostRef.current.innerHTML = "";
+        qr.append(hostRef.current);
       }
       setLoading(false);
     })();
@@ -109,6 +115,7 @@ export default function QrGenerator({ initialData, dataLabel }: QrGeneratorProps
           className="flex min-h-[320px] w-[320px] items-center justify-center rounded-xl border border-slate-100 bg-white p-2"
         >
           {loading && <span className="text-slate-400">Generating…</span>}
+          <div ref={hostRef} className="flex items-center justify-center" />
         </div>
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button
