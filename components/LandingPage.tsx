@@ -2,6 +2,15 @@ import Link from "next/link";
 import QrGenerator from "@/components/QrGenerator";
 import { LANDING_PAGES, SITE_NAME, SITE_URL } from "@/lib/constants";
 
+// Escape angle brackets before injecting JSON into an inline <script> so future
+// content edits can never break out of the element.
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
+}
+
 export interface LandingFaqItem {
   q: string;
   a: string;
@@ -174,15 +183,15 @@ export default function LandingPage({
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(howToJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
 
       <footer className="mt-12 border-t border-slate-200 pt-6 text-center text-sm text-slate-400">
