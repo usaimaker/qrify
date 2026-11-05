@@ -5,6 +5,15 @@ import ShareButtons from "@/components/ShareButtons";
 import { FAQ_ITEMS } from "@/lib/faq";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, LANDING_PAGES } from "@/lib/constants";
 
+// JSON-LD is injected inside an inline <script>. Escape angle brackets so content
+// can never terminate the element, even if copy is edited later.
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
+}
+
 export default function Home() {
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -77,11 +86,11 @@ export default function Home() {
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(webAppJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
 
       <footer className="mt-12 border-t border-slate-200 pt-6 text-center text-sm text-slate-400">
