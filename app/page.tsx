@@ -55,6 +55,26 @@ export default function Home() {
 
       <ContentSections />
 
+      <section className="mt-12">
+        <h2 className="text-2xl font-bold text-slate-800">Free QR code tools for every use case</h2>
+        <p className="mt-2 text-slate-600">
+          Each guide below solves one specific job, with the exact link format, print settings and
+          pitfalls you need to get right the first time.
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {LANDING_PAGES.map((page) => (
+            <Link
+              key={page.slug}
+              href={`/${page.slug}`}
+              className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-400 hover:shadow-sm"
+            >
+              <span className="block font-semibold text-brand-700">{page.navLabel}</span>
+              <span className="mt-1 block text-sm leading-relaxed text-slate-600">{page.blurb}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
