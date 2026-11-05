@@ -23,18 +23,40 @@ export const SITE_KEYWORDS = [
   "wifi qr code generator",
   "vcard qr code",
   "qr code maker",
+  "qr code for pdf",
+  "restaurant menu qr code",
+  "google maps qr code",
+  "whatsapp qr code",
+  "instagram qr code",
+  "email qr code",
+  "phone number qr code",
+  "youtube video qr code",
+  "business card qr code",
+  "transparent qr code",
   "QRify",
 ];
 
 export interface LandingPageMeta {
   slug: string;
   navLabel: string;
+  blurb: string;
 }
 
-// 长尾 SEO 着陆页清单：sitemap 与页内互链均从这里读取，新增页面只需改这一处。
+// 长尾 SEO 着陆页清单：sitemap、站内互链与首页工具网格都从这里读取，新增页面只需改这一处。
+// 前 4 项对应 app/<slug>/page.tsx 静态页；其余由 app/[slug]/page.tsx 动态生成。
 export const LANDING_PAGES: LandingPageMeta[] = [
-  { slug: "qr-code-with-logo", navLabel: "QR Code with Logo" },
-  { slug: "wifi-qr-code", navLabel: "WiFi QR Code" },
-  { slug: "vcard-qr-code", navLabel: "vCard QR Code" },
-  { slug: "svg-qr-code", navLabel: "SVG QR Code" },
+  { slug: "qr-code-with-logo", navLabel: "QR Code with Logo", blurb: "Put your brand mark in the centre without breaking the scan." },
+  { slug: "wifi-qr-code", navLabel: "WiFi QR Code", blurb: "Let guests join your network with one scan instead of a long password." },
+  { slug: "vcard-qr-code", navLabel: "vCard QR Code", blurb: "Share a full contact card that saves straight into a phone." },
+  { slug: "svg-qr-code", navLabel: "SVG QR Code", blurb: "Vector output that stays razor sharp at any print size." },
+  { slug: "qr-code-for-pdf", navLabel: "QR Code for PDF", blurb: "Link a document, manual or brochure from any printed surface." },
+  { slug: "restaurant-menu-qr-code", navLabel: "Restaurant Menu QR Code", blurb: "Table codes you never reprint when the menu changes." },
+  { slug: "google-maps-qr-code", navLabel: "Google Maps QR Code", blurb: "Open your exact location and start directions instantly." },
+  { slug: "whatsapp-qr-code", navLabel: "WhatsApp QR Code", blurb: "Open a chat, optionally with a pre-filled message." },
+  { slug: "instagram-qr-code", navLabel: "Instagram QR Code", blurb: "Turn packaging, posters and receipts into followers." },
+  { slug: "email-qr-code", navLabel: "Email QR Code", blurb: "Open the mail app with address, subject and body filled in." },
+  { slug: "phone-number-qr-code", navLabel: "Phone Number QR Code", blurb: "One scan opens the dialler with your number ready." },
+  { slug: "youtube-video-qr-code", navLabel: "YouTube Video QR Code", blurb: "Attach a tutorial or demo film to a physical object." },
+  { slug: "business-card-qr-code", navLabel: "Business Card QR Code", blurb: "Fit your whole contact and portfolio on a small card." },
+  { slug: "transparent-qr-code", navLabel: "Transparent QR Code", blurb: "No white box — drop the code onto coloured artwork." },
 ];
