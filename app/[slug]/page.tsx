@@ -6,6 +6,10 @@ import { SITE_URL } from "@/lib/constants";
 
 type PageProps = { params: { slug: string } };
 
+// Only the slugs returned below are valid routes; everything else is a hard 404
+// instead of an on-demand SSR render, which avoids soft-404 crawl waste.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return SEO_PAGES.map((page) => ({ slug: page.slug }));
 }
