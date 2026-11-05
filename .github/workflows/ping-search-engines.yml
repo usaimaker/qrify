@@ -7,22 +7,39 @@ on:
       - 'stats/**'
   schedule:
     - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - name: Ping Bing via IndexNow
+      - name: Build IndexNow payload from sitemap
         run: |
-          curl -s -o /dev/null -w "Bing: %{http_code}\n" \
-            -X POST "https://www.bing.com/indexnow" \
-            -H "Content-Type: application/json" \
-            -d '{"host":"qrify.dynv6.net","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify.dynv6.net/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify.dynv6.net/","https://qrify.dynv6.net/qr-code-with-logo","https://qrify.dynv6.net/wifi-qr-code","https://qrify.dynv6.net/vcard-qr-code","https://qrify.dynv6.net/svg-qr-code"]}'
+          curl -fsSL https://qrify.dynv6.net/sitemap.xml -o sitemap.xml
+          python3 - <<'PY'
+          import re, json
+          xml = open('sitemap.xml', encoding='utf-8').read()
+          urls = re.findall(r'<loc>\s*([^<]+?)\s*</loc>', xml)
+          payload = {
+            "host": "qrify.dynv6.net",
+            "key": "d92610460fb215d355e0fa3ff77d983f",
+            "keyLocation": "https://qrify.dynv6.net/d92610460fb215d355e0fa3ff77d983f.txt",
+            "urlList": urls,
+          }
+          with open('payload.json', 'w') as f:
+              json.dump(payload, f)
+          print(f"Submitting {len(urls)} URLs to IndexNow")
+          PY
 
-      - name: Ping Yandex
+      - name: Submit to IndexNow endpoints
         run: |
-          curl -s -o /dev/null -w "Yandex: %{http_code}\n" \
-            -X POST "https://yandex.com/indexnow" \
-            -H "Content-Type: application/json" \
-            -d '{"host":"qrify.dynv6.net","key":"d92610460fb215d355e0fa3ff77d983f","keyLocation":"https://qrify.dynv6.net/d92610460fb215d355e0fa3ff77d983f.txt","urlList":["https://qrify.dynv6.net/","https://qrify.dynv6.net/qr-code-with-logo","https://qrify.dynv6.net/wifi-qr-code","https://qrify.dynv6.net/vcard-qr-code","https://qrify.dynv6.net/svg-qr-code"]}'
+          for ep in \
+            https://www.bing.com/indexnow \
+            https://yandex.com/indexnow \
+            https://search.seznam.cz/indexnow ; do
+            curl -s -o /dev/null -w "$ep -> %{http_code}\n" \
+              -X POST "$ep" \
+              -H "Content-Type: application/json; charset=utf-8" \
+              --data-binary @payload.json
+          done
