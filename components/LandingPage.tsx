@@ -148,27 +148,28 @@ export default function LandingPage({
       </section>
 
       <section className="mt-10">
-        <h2 className="text-xl font-bold text-slate-800">More QR code tools</h2>
-        <ul className="mt-3 flex flex-wrap gap-2">
-          <li>
-            <Link
-              href="/"
-              className="inline-block rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700"
-            >
-              Custom QR Code Generator
-            </Link>
-          </li>
+        <h2 className="text-xl font-bold text-slate-800">More free QR code tools</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/"
+            className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-400 hover:shadow-sm"
+          >
+            <span className="block font-semibold text-brand-700">Custom QR Code Generator</span>
+            <span className="mt-1 block text-sm leading-relaxed text-slate-600">
+              Logos, gradients, dot styles and vector export in one place.
+            </span>
+          </Link>
           {others.map((p) => (
-            <li key={p.slug}>
-              <Link
-                href={`/${p.slug}`}
-                className="inline-block rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400 hover:text-brand-700"
-              >
-                {p.navLabel}
-              </Link>
-            </li>
+            <Link
+              key={p.slug}
+              href={`/${p.slug}`}
+              className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-400 hover:shadow-sm"
+            >
+              <span className="block font-semibold text-brand-700">{p.navLabel}</span>
+              <span className="mt-1 block text-sm leading-relaxed text-slate-600">{p.blurb}</span>
+            </Link>
           ))}
-        </ul>
+        </div>
       </section>
 
       <script
