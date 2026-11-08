@@ -92,11 +92,6 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
-
-      <footer className="mt-12 border-t border-slate-200 pt-6 text-center text-sm text-slate-400">
-        &copy; {new Date().getFullYear()} {SITE_NAME} &middot; 100% free &middot; no sign-up &middot;
-        generated locally in your browser
-      </footer>
     </div>
   );
 }
