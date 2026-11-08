@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import {
   ADSENSE_PUBLISHER_ID,
   GSC_VERIFICATION,
@@ -72,7 +73,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">{children}
+      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+        {children}
+        <footer className="mt-12 border-t border-slate-200 bg-white">
+          <div className="mx-auto max-w-5xl px-4 py-6 text-center text-sm text-slate-500">
+            &copy; {new Date().getFullYear()} {SITE_NAME} &middot; 100% free &middot; no sign-up
+            <span className="mx-2">&middot;</span>
+            <Link href="/about" className="hover:text-brand-700">
+              About
+            </Link>
+            <span className="mx-2">&middot;</span>
+            <Link href="/privacy" className="hover:text-brand-700">
+              Privacy
+            </Link>
+            <span className="mx-2">&middot;</span>
+            <Link href="/contact" className="hover:text-brand-700">
+              Contact
+            </Link>
+          </div>
+        </footer>
         <Analytics />
         <Script id="qrify-track" strategy="afterInteractive">
           {`(function(){try{var i=new Image();i.src='/api/track?p='+encodeURIComponent(location.pathname)+'&r='+encodeURIComponent(document.referrer||'');}catch(e){}})();`}
