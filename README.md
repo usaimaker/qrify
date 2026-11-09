@@ -46,3 +46,18 @@ A free, 100% client-side QR code generator. No sign-up, no watermark, no upload 
 ## License
 
 MIT
+
+<!-- QRIFY_TOOLS_START -->
+## Free QR code tools (QRify)
+
+A browser-based QR generator with no signup, no watermark and PNG/SVG export:
+
+- [QRify — free QR code generator](https://qrify.dynv6.net/)
+
+- [QR Code with Logo](https://qrify.dynv6.net/qr-code-with-logo) — Put your brand mark in the centre of a scannable code. Keep the logo under about 20% of the area and use high error correction.
+- [WiFi QR Code](https://qrify.dynv6.net/wifi-qr-code) — Guests scan to join the network without typing a password. Encode the SSID, security type and passphrase in the WIFI: format.
+- [vCard QR Code](https://qrify.dynv6.net/vcard-qr-code) — Share contact details at events. A scan adds name, phone, email and company straight to the address book.
+- [SVG QR Code](https://qrify.dynv6.net/svg-qr-code) — Vector output stays sharp on posters, packaging and large-format print where a PNG would blur.
+
+Full walkthrough and all 14 presets: [https://usaimaker.github.io/free-qr-code-generator.html](https://usaimaker.github.io/free-qr-code-generator.html)
+<!-- QRIFY_TOOLS_END -->
