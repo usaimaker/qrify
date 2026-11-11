@@ -19,10 +19,26 @@ export async function GET(req: NextRequest) {
   if (ref) { try { refHost = new URL(ref).host; } catch { refHost = ref.slice(0, 60); } }
   const rec = { t: new Date().toISOString(), p: path, c: country, ref: refHost, ua };
 
+  const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
+
+  // Self-check render browser carries UA "qrify-audit-render" so it is deterministically
+  // excluded from traffic. Network-level blocking of /api/track is flaky across 15 page
+  // loads and was polluting stats with fake "visitors"; a server-side UA gate is reliable.
+  if (ua.includes("qrify-audit-render")) {
+    return new Response(gif, {
+      status: 200,
+      headers: {
+        "Content-Type": "image/gif",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "x-tk": TOKEN ? "1" : "0",
+        "x-write": "skip-audit",
+      },
+    });
+  }
+
   let w = "skip";
   if (TOKEN) { try { w = await writeHit(rec); } catch (e) { w = "exc:" + String(e).slice(0, 50); } }
 
-  const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
   return new Response(gif, {
     status: 200,
     headers: {
