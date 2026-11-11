@@ -21,17 +21,19 @@ export async function GET(req: NextRequest) {
 
   const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7", "base64");
 
-  // Self-check render browser carries UA "qrify-audit-render" so it is deterministically
-  // excluded from traffic. Network-level blocking of /api/track is flaky across 15 page
-  // loads and was polluting stats with fake "visitors"; a server-side UA gate is reliable.
-  if (ua.includes("qrify-audit-render")) {
+  // Headless/automated browsers are never human visitors. Vercel's own preview /
+  // pre-deploy rendering (UA "HeadlessChrome") loads the production pages and fires
+  // the tracker, manufacturing fake hits; the self-check render browser is tagged
+  // "qrify-audit-render" for the same reason. Skip both deterministically server-side
+  // (network-level blocking alone is flaky across many page loads).
+  if (ua.includes("HeadlessChrome") || ua.includes("qrify-audit-render")) {
     return new Response(gif, {
       status: 200,
       headers: {
         "Content-Type": "image/gif",
         "Cache-Control": "no-store, no-cache, must-revalidate",
         "x-tk": TOKEN ? "1" : "0",
-        "x-write": "skip-audit",
+        "x-write": "skip-automated",
       },
     });
   }
