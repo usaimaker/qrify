@@ -90,6 +90,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/contact" className="hover:text-brand-700">
               Contact
             </Link>
+            {/* QRIFY_MONETIZE_START — idempotent, verified real payout channels */}
+            <div className="mx-auto mt-5 max-w-3xl rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-left text-sm leading-relaxed text-slate-600">
+              <p className="mb-1 font-semibold text-slate-800">Keep QRify free</p>
+              <p className="mb-3">
+                QRify is a free QR code generator with no sign-up. Ads help keep it online;
+                you can also support hosting directly or pick a tested printer for your codes.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <a href="https://ko-fi.com/aidaily" target="_blank" rel="noopener noreferrer" className="rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white hover:bg-indigo-700">
+                  Support on Ko-fi
+                </a>
+                <a href="https://www.buymeacoffee.com/felovery" target="_blank" rel="noopener noreferrer" className="rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium text-slate-700 hover:bg-slate-100">
+                  Buy me a coffee
+                </a>
+                <a href="https://www.amazon.com/s?k=qr+code+label+printer&tag=felovery-20" target="_blank" rel="sponsored noopener noreferrer" className="rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium text-slate-700 hover:bg-slate-100">
+                  QR label printers on Amazon
+                </a>
+              </div>
+              <p className="mt-3 text-xs text-slate-400">
+                As an Amazon Associate I earn from qualifying purchases. Affiliate links do not
+                change the price you pay. QRify never sells your data.
+              </p>
+            </div>
+            {/* QRIFY_MONETIZE_END */}
           </div>
         </footer>
         <Analytics />
